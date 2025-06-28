@@ -10,14 +10,22 @@ import React, { useState } from 'react'
 const fetchUsers= async():Promise<UserType[]>=>{
 
   const res = await fetch('/api/mysql/users')
-  if(!res)throw new Error("اینترنت را چک کن")
+  if(!res.ok){
+    console.error('خطا در دریافت کاربران:', res.statusText);
+    return []; // آرایه خالی در صورت خطا
+  }
     return res.json()
 }
 
 const fetchStudents = async():Promise<StudentType[]>=>{
 
   const res = await fetch('/api/mysql/studensts')
-  if(!res)throw new Error("اینترنت را چک کن")
+
+    if (!res.ok) {
+    console.error('خطا در دریافت دانش‌آموزان:', res.statusText);
+    return []; // آرایه خالی در صورت خطا
+  }
+  
     return res.json()
 }
 
@@ -159,10 +167,10 @@ const [postContent, setPostContent] = useState('');
             className="border p-2 mr-2"
           />
           <input
-            type="email"
+            type="text"
             value={user}
             onChange={(e) => setUser(e.target.value)}
-            placeholder="ایمیل"
+            placeholder="user"
             className="border p-2 mr-2"
           />
           <button
@@ -207,21 +215,29 @@ const [postContent, setPostContent] = useState('');
 
         {postMutation.isError && <div className="text-red-500 mb-4">خطا: {postMutation.error.message}</div>}
 
-        <ul>
-          {users?.map((user) => (
-            <li key={user.id} className="border-b py-2">
-              <div>
-                {user.name} - {user.user}
-              </div>
-              <ul className="ml-4">
-                {user.posts?.map((post) => (
-                  <li key={post.id} className="text-sm text-gray-600">
-                    {post.content} (ایجاد شده در: {new Date(post.createdAt).toLocaleString('fa-IR')})
-                  </li>
-                ))}
-              </ul>
-            </li>
-          ))}
+      <ul>
+          {Array.isArray(users) && users.length > 0 ? (
+            users.map((user) => (
+              <li key={user.id} className="border-b py-2">
+                <div>
+                  {user.name} - {user.user}
+                </div>
+                <ul className="ml-4">
+                  {Array.isArray(user.posts) && user.posts.length > 0 ? (
+                    user.posts.map((post) => (
+                      <li key={post.id} className="text-sm text-gray-600">
+                        {post.content} (ایجاد شده در: {new Date(post.createdAt).toLocaleString('fa-IR')})
+                      </li>
+                    ))
+                  ) : (
+                    <li>پستی یافت نشد</li>
+                  )}
+                </ul>
+              </li>
+            ))
+          ) : (
+            <li>کاربری یافت نشد</li>
+          )}
         </ul>
       </div>
 
@@ -264,11 +280,15 @@ const [postContent, setPostContent] = useState('');
         {studentMutation.isError && <div className="text-red-500 mb-4">خطا: {studentMutation.error.message}</div>}
 
         <ul>
-          {students?.map((student) => (
-            <li key={student.id} className="border-b py-2">
-              {student.name} - کلاس: {student.grade} - معدل: {student.gpa}
-            </li>
-          ))}
+          {Array.isArray(students) && students.length > 0 ? (
+            students.map((student) => (
+              <li key={student.id} className="border-b py-2">
+                {student.name} - کلاس: {student.grade} - معدل: {student.gpa}
+              </li>
+            ))
+          ) : (
+            <li>دانش‌آموزی یافت نشد</li>
+          )}
         </ul>
       </div>
     </div>

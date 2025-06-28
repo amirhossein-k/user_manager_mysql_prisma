@@ -13,7 +13,7 @@ export  async function GET() {
         return NextResponse.json(users,{status:200})
     } catch (error) {
         console.log(error)
-        return NextResponse.json({error:"مشکل سرور"},{status:500})
+       return NextResponse.json([], { status: 200 }); // آرایه خالی برگردانید
     }finally{
         await prisma.$disconnect()
     }
